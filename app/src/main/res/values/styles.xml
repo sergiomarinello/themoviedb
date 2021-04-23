@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Define the sub text in the Detail. -->
+    <style name="DetailSubText">
+        <item name="android:textStyle">italic</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textSize">@dimen/details_text_size_release</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <!-- Define the sub text in the Detail. -->
+    <style name="DetailSubText.Homepage">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+</resources>

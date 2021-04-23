@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="chips_text_color_not_checked">#FFFFFFFF</color>
+    <color name="chips_text_color_checked">#FF000000</color>
+    <color name="favorite_fab_background_tint_color_not_favorite">#FFFFFFFF</color>
+    <color name="favorite_fab_background_tint_color_favorite">#FFFF0F5C</color>
+    <color name="chips_color_background_selected">#f3f3f3</color>
+    <color name="chips_color_background_not_selected">#DD2b2828</color>
+    <color name="activity_details_collapsed_toolbar_color">#FF333333</color>
+</resources>

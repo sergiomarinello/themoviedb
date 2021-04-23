@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View" />
+        <import type="androidx.core.content.ContextCompat" />
+        <import type="com.smarinello.themoviedb.R" />
+        <variable
+            name="summary"
+            type="com.smarinello.themoviedb.model.Movie"/>
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/summary_movie_card_height"
+        android:layout_marginBottom="@dimen/summary_movie_card_margin_bottom"
+        android:layout_marginEnd="@dimen/summary_movie_card_margin_end"
+        android:layout_marginStart="@dimen/summary_movie_card_margin_start"
+        android:layout_marginTop="@dimen/summary_movie_card_margin_top"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        app:cardCornerRadius="0dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/summary_poster_image_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:maxWidth="@dimen/summary_movie_size_image_width"
+                android:adjustViewBounds="true"
+                android:importantForAccessibility="no"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_image_placeholder"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:src="@drawable/ic_image_placeholder"/>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/summary_description_layout"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/summary_margin_start_description_layout"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/favorite_fab"
+                app:layout_constraintStart_toEndOf="@+id/summary_poster_image_view"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/summary_title_text_view"
+                    android:text="@{summary.title}"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:textSize="@dimen/summary_movie_text_size_title"
+                    android:textStyle="bold"
+                    app:visibleOrGone="@{!summary.title.isEmpty}"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Titanic" />
+
+                <TextView
+                    android:id="@+id/summary_genres_text_view"
+                    android:text="@{summary.genres}"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/summary_title_text_view"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:textSize="@dimen/summary_movie_text_size_genres"
+                    android:layout_marginTop="@dimen/summary_movie_margin_top_between_elements"
+                    app:visibleOrGone="@{!summary.genreIds.isEmpty}"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/summary_title_text_view"
+                    tools:text="Drama, Romance, Thriller" />
+
+                <TextView
+                    android:id="@+id/summary_release_date_text_view"
+                    android:text="@{summary.releaseDate}"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:textSize="@dimen/summary_movie_text_size_release_size"
+                    android:layout_marginTop="@dimen/summary_movie_margin_top_between_elements"
+                    android:textStyle="italic"
+                    app:visibleOrGone="@{!summary.releaseDate.isEmpty}"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/summary_genres_text_view"
+                    tools:text="19/12/1997" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/favorite_fab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/favorite_filter"
+                android:backgroundTint="@{ContextCompat.getColor(context, summary.isFavorite ? R.color.favorite_fab_background_tint_color_favorite : R.color.favorite_fab_background_tint_color_not_favorite )}"
+                android:scaleType="center"
+                app:elevation="6dp"
+                app:fabCustomSize="24dp"
+                app:maxImageSize="18dp"
+                app:backgroundTint="@android:color/transparent"
+                app:borderWidth="0dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_favorite"
+                tools:src="@drawable/ic_favorite" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+</layout>

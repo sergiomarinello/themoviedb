@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="summary_movie_card_height">120dp</dimen>
+    <dimen name="summary_movie_card_margin_start">8dp</dimen>
+    <dimen name="summary_movie_card_margin_end">8dp</dimen>
+    <dimen name="summary_movie_card_margin_top">4dp</dimen>
+    <dimen name="summary_movie_card_margin_bottom">4dp</dimen>
+
+    <dimen name="summary_movie_size_image_width">120dp</dimen>
+    <dimen name="summary_margin_start_description_layout">8dp</dimen>
+    <dimen name="summary_movie_margin_top_between_elements">8dp</dimen>
+    <dimen name="summary_movie_text_size_title">16sp</dimen>
+    <dimen name="summary_movie_text_size_genres">12sp</dimen>
+    <dimen name="summary_movie_text_size_release_size">12sp</dimen>
+
+    <dimen name="chip_margin_space">16dp</dimen>
+    <dimen name="chip_spacing">30dp</dimen>
+
+    <dimen name="recyclerview_margin_top">8dp</dimen>
+
+    <dimen name="details_constraint_guide_dimension">8dp</dimen>
+    <dimen name="details_text_size_release">14sp</dimen>
+    <dimen name="details_margin_top_dimension">16dp</dimen>
+    <dimen name="detail_text_size_title">40sp</dimen>
+    <dimen name="details_text_size_overview">16sp</dimen>
+    <dimen name="detail_image_height">450dp</dimen>
+
+    <dimen name="progress_bar_size">42dp</dimen>
+
+</resources>

@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">TheMovieDb</string>
+    <string name="popular_filter">Popular</string>
+    <string name="favorite_filter">Favorite</string>
+    <string name="search_hint">What do you want to search ?</string>
+    <string name="content_description_image">An image</string>
+
+    <!--    Error messages-->
+    <string name="error_message_connectivity">Please check your internet connection and try again.</string>
+    <string name="error_fetch_data">Some error happens to fetch the data. Please check your internet connection and try again.</string>
+
+</resources>

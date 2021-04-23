@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View"/>
+        <import type="com.smarinello.themoviedb.viewmodel.MainActivityViewModel.OperationSelected"/>
+
+        <variable
+            name="viewModel"
+            type="com.smarinello.themoviedb.viewmodel.MainActivityViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".view.activity.MainActivity">
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/search_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:iconifiedByDefault="false"
+            app:queryHint="@string/search_hint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group_filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/chip_margin_space"
+            app:chipSpacing="@dimen/chip_spacing"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/search_view"
+            app:selectionRequired="false"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_popular"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:clickable="@{viewModel.operationSelected != OperationSelected.POPULAR}"
+                android:checked="@{viewModel.operationSelected == OperationSelected.POPULAR}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="@{() -> viewModel.onPopularSelected()}"
+                android:text="@string/popular_filter"
+                android:textColor="@color/chips_color_text_color"
+                app:chipBackgroundColor="@color/chips_color_background" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_favorite"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:clickable="@{viewModel.operationSelected != OperationSelected.FAVORITE}"
+                android:checked="@{viewModel.operationSelected == OperationSelected.FAVORITE}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="@{() -> viewModel.onFavoriteSelected()}"
+                android:text="@string/favorite_filter"
+                android:textColor="@color/chips_color_text_color"
+                app:chipBackgroundColor="@color/chips_color_background" />
+        </com.google.android.material.chip.ChipGroup>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/movie_list"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/recyclerview_margin_top"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/chip_group_filter"
+            app:spanCount="1"
+            tools:listitem="@layout/summary_movie" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/loading_layout"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@android:color/transparent"
+            app:visibleOrGone="@{viewModel.showLoadingProgressBar}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/chip_group_filter"
+            tools:visibility="invisible">
+
+            <androidx.core.widget.ContentLoadingProgressBar
+                android:id="@+id/spinnerLoading"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="@dimen/progress_bar_size"
+                android:layout_height="@dimen/progress_bar_size"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                app:visibleOrGone="@{viewModel.showLoadingProgressBar}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
