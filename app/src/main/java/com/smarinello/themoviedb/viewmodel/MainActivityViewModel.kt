@@ -26,6 +26,8 @@ import java.lang.ref.WeakReference
 import java.util.stream.Collectors
 import kotlin.coroutines.CoroutineContext
 
+private const val INVALID_MOVIE_INDEX: Int = -1
+
 /**
  * [AndroidViewModel] used to provide the content to the [MainActivity].
  */
@@ -55,15 +57,30 @@ class MainActivityViewModel(
     val movieList = MutableLiveData<ArrayList<Movie>>()
 
     /**
+     * Init the
+     */
+    fun onInitialize() {
+        actualPage = 1
+        onPopularSelected()
+        loadPopularPage(page = 1)
+    }
+
+    /**
      * Action executed when the "Popular" category was selected.
      */
     fun onPopularSelected() {
-        Log.d(tag, "onPopularSelected")
-        operationSelected.postValue(OperationSelected.POPULAR)
-        actualPage = 1
-        movieList.postValue(arrayListOf())
-        populateGenres()
-        loadPopular(actualPage)
+        if (connectivityUtils.isInternetAccessAvailable()) {
+            Log.d(tag, "onPopularSelected")
+            operationSelected.postValue(OperationSelected.POPULAR)
+            actualPage = 1
+            movieList.postValue(arrayListOf())
+            populateGenres()
+            loadPopularPage(page = 1)
+        } else {
+            movieList.postValue(arrayListOf())
+            operationSelected.postValue(OperationSelected.NONE)
+            showConnectivityToast()
+        }
     }
 
     /**
@@ -97,27 +114,41 @@ class MainActivityViewModel(
      * Action executed when the favorite button was clicked.
      */
     override fun onClickFavoriteButton(movie: Movie) {
-        val index: Int = movieList.value?.indexOf(movie) ?: -1
+        val index: Int = movieList.value?.indexOf(movie) ?: INVALID_MOVIE_INDEX
         Log.d(tag, "onClickFavoriteButton, title = ${movie.title}, isFavorite = ${movie.isFavorite}, index = $index")
         movie.isFavorite = !movie.isFavorite
-        launch {
-            if (movie.isFavorite) {
-                val resultMovieDetail = withContext(Dispatchers.IO) { repository.getMovieDetails(movie.id) }
-                Log.d(tag, "onClickFavoriteButton, resultMovieDetail = $resultMovieDetail")
-                if (resultMovieDetail is ResponseResult.Success) {
-                    val movieDetail = resultMovieDetail.data
-                    movieDetail.isFavorite = true
-                    withContext(Dispatchers.IO) { repository.saveFavoriteMovieDetails(movieDetail) }
-                    Log.d(tag, "onClickFavoriteButton, saveFavoriteMovieDetails with index = ${movieDetail.id}")
-                    cachePosterImage(movieDetail.buildPosterUrl())
-                }
-            } else {
-                withContext(Dispatchers.IO) {
-                    repository.removeFavoriteMovie(movie.id)
-                    repository.deleteFavoriteMovieDetails(movie.id)
+        if (index != INVALID_MOVIE_INDEX) {
+            launch {
+                if (movie.isFavorite && connectivityUtils.isInternetAccessAvailable()) {
+                    val resultMovieDetail = withContext(Dispatchers.IO) { repository.getMovieDetails(movie.id) }
+                    Log.d(tag, "onClickFavoriteButton, resultMovieDetail = $resultMovieDetail")
+                    if (resultMovieDetail is ResponseResult.Success) {
+                        val movieDetail = resultMovieDetail.data
+                        movieDetail.isFavorite = true
+                        withContext(Dispatchers.IO) {
+                            repository.saveFavoriteMovieDetails(movieDetail)
+                        }
+                        Log.d(tag, "onClickFavoriteButton, saveFavoriteMovieDetails with index = ${movieDetail.id}")
+                        cachePosterImage(movieDetail.buildPosterUrl())
+                    }
+                    updateMovieListOnClickFavoriteButton(movie, index)
+                } else {
+                    withContext(Dispatchers.IO) {
+                        repository.removeFavoriteMovie(movie.id)
+                        repository.deleteFavoriteMovieDetails(movie.id)
+                        if (!connectivityUtils.isInternetAccessAvailable()) {
+                            val newList = ArrayList<Movie>()
+                            movieList.value?.removeAt(index)
+                            movieList.value?.let {
+                                newList.addAll(it)
+                            }
+                            movieList.postValue(newList)
+                        } else {
+                            updateMovieListOnClickFavoriteButton(movie, index)
+                        }
+                    }
                 }
             }
-            updateMovieListOnClickFavoriteButton(movie, index)
         }
     }
 
@@ -128,7 +159,7 @@ class MainActivityViewModel(
         if (operationSelected.value == OperationSelected.POPULAR) {
             Log.d(tag, "Load more popular movies")
             actualPage += 1
-            loadPopular(actualPage)
+            loadPopularPage(actualPage)
         } else if (operationSelected.value == OperationSelected.SEARCH) {
             Log.d(tag, "Load more searched movies")
             actualPage += 1
@@ -228,7 +259,7 @@ class MainActivityViewModel(
     /**
      * Load a Popular [page].
      */
-    private fun loadPopular(page: Int) {
+    private fun loadPopularPage(page: Int) {
         Log.d(tag, "loadPopular, page $page")
         if (connectivityUtils.isInternetAccessAvailable()) {
             showLoadingProgressBar.postValue(true)
@@ -272,25 +303,25 @@ class MainActivityViewModel(
     }
 
     private fun loadSearch(query: String?, page: Int) {
-        if (connectivityUtils.isInternetAccessAvailable()) {
-            if (!query.isNullOrEmpty() && query.isNotBlank()) {
-                showLoadingProgressBar.postValue(true)
-                launch {
-                    val result = withContext(Dispatchers.IO) {
-                        repository.searchMovies(
-                            query,
-                            page = page
-                        )
-                    }
-                    showLoadingProgressBar.postValue(false)
-                    handleMovieListResult(result)
+        if (!connectivityUtils.isInternetAccessAvailable()) {
+            showConnectivityToast()
+            movieList.postValue(arrayListOf())
+            showSearchInFavoriteOnlyToast()
+        }
+        if (!query.isNullOrEmpty() && query.isNotBlank()) {
+            showLoadingProgressBar.postValue(true)
+            launch {
+                val result = withContext(Dispatchers.IO) {
+                    repository.searchMovies(
+                        query,
+                        page = page
+                    )
                 }
-            } else {
-                movieList.postValue(arrayListOf())
+                showLoadingProgressBar.postValue(false)
+                handleMovieListResult(result)
             }
         } else {
             movieList.postValue(arrayListOf())
-            showConnectivityToast()
         }
     }
 
@@ -372,6 +403,16 @@ class MainActivityViewModel(
     private fun showConnectivityToast() {
         weakContext.get()?.let {
             toastMessage.postValue(it.resources.getString(R.string.error_message_connectivity))
+            showToastMessage.postValue(true)
+        }
+    }
+
+    /**
+     * Shows a [Toast] to indicates the user that search will be done only in favorite movies.
+     */
+    private fun showSearchInFavoriteOnlyToast() {
+        weakContext.get()?.let {
+            toastMessage.postValue(it.resources.getString(R.string.info_message_search_only_favorite_movies))
             showToastMessage.postValue(true)
         }
     }

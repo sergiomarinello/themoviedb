@@ -42,7 +42,7 @@ Para desenvolver o seu app de filmes, você vai precisar se cadastrar no TheMovi
 8. Mockito, Google's Truth and Mockito-Kotlin was used to create unit tests.
 9. Enabled R8 that provides encryption, and store the TMDB key value in build/gradle to secure the value inside it.
 10. detekt and ktlint for static code analysis that brings quality for the code.
-11. Espresso to do automated testing UI that brings more reliability to the code.
+11. Espresso and Robot pattern to do automated testing UI that brings more reliability to the code.
 
 ## Observation
 * Needs a valid key from the TMDB and MUST BE replace the field API_KEY_VALUE by its string value in build/gradle

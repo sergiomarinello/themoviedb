@@ -13,7 +13,7 @@ import com.smarinello.themoviedb.model.MovieDetails
 @Dao
 interface FavoriteMovieDao {
 
-    @Query("SELECT * FROM movie_detail")
+    @Query("SELECT * FROM movie_detail ORDER BY title")
     suspend fun getFavoriteMovieDetailsList(): List<MovieDetails>
 
     @Query("SELECT * FROM movie_detail WHERE id = :id")
@@ -27,4 +27,7 @@ interface FavoriteMovieDao {
 
     @Delete
     suspend fun deleteFavoriteMovie(movieDetails: MovieDetails)
+
+    @Query("SELECT * FROM movie_detail WHERE title LIKE '%' || :query  || '%' ORDER BY title")
+    suspend fun searchMovies(query: String): List<MovieDetails>?
 }

@@ -1,5 +1,6 @@
 package com.smarinello.themoviedb.repository
 
+import com.smarinello.themoviedb.extensions.createMovieList
 import com.smarinello.themoviedb.model.Genre
 import com.smarinello.themoviedb.model.Movie
 import com.smarinello.themoviedb.model.MovieDetails
@@ -40,7 +41,7 @@ class Repository(
         language: String = DEFAULT_LOCALE_STRING,
     ): ResponseResult<List<Movie>> =
         if (connectivityUtils.isInternetAccessAvailable()) movieRepository.searchMovies(query, language, page) else
-            ResponseResult.Error(UnknownHostException())
+            ResponseResult.Success(local.favoriteDao().searchMovies(query)?.createMovieList() ?: listOf())
 
     /**
      * Get genre list with in the [language].

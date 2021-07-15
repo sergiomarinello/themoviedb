@@ -1,30 +1,26 @@
 package com.smarinello.themoviedb
 
-import android.view.KeyEvent
 import androidx.core.view.isVisible
 import androidx.core.widget.ContentLoadingProgressBar
 import androidx.recyclerview.widget.RecyclerView
-import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingPolicies
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
-import androidx.test.espresso.matcher.ViewMatchers.hasTextColor
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import com.smarinello.themoviedb.robot.BaseTestRobot
+import com.smarinello.themoviedb.robot.favorite
+import com.smarinello.themoviedb.robot.movieList
+import com.smarinello.themoviedb.robot.popular
+import com.smarinello.themoviedb.robot.search
 import com.smarinello.themoviedb.utils.ConnectivityUtils
-import com.smarinello.themoviedb.utils.InstrumentedUtilsTest
-import com.smarinello.themoviedb.utils.InstrumentedUtilsTest.clickOnViewChild
 import com.smarinello.themoviedb.view.activity.DetailActivity
 import com.smarinello.themoviedb.view.activity.MainActivity
 import org.hamcrest.Matchers.greaterThan
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -35,11 +31,14 @@ import java.util.concurrent.TimeUnit
 private const val INVALID_COUNT_ITEMS_VALUE: Int = -1
 
 /**
- * This class consist to verify the MainActivity basic functions and demands internet connection.
+ * This class consist to verify the MainActivity basic functions and demands internet connection
+ * and a valid API key.
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class MainActivityInstrumentedTest {
+    private val invalidApiKeyValue: String = "put the key value here"
+
     private val invalidSearchMovieTitle: String = "**********************----------++++++++++++++++"
     private val invalidNumberItemsMessage: String = "invalid number of items"
     /**
@@ -57,6 +56,9 @@ class MainActivityInstrumentedTest {
         IdlingPolicies.setMasterPolicyTimeout(1, TimeUnit.MINUTES)
         IdlingPolicies.setIdlingResourceTimeout(1, TimeUnit.MINUTES)
 
+        // Check for a valid API key
+        assertNotEquals(BuildConfig.API_KEY_VALUE, invalidApiKeyValue)
+
         // Check internet connection.
         activityRule.scenario.onActivity { activity ->
             assertEquals(ConnectivityUtils(activity).isInternetAccessAvailable(), true)
@@ -69,11 +71,10 @@ class MainActivityInstrumentedTest {
      */
     @Test
     fun validSearchTest() {
-        // Type title and then press enter the button to search.
-        onView(withId(R.id.search_src_text))
-            .perform(ViewActions.typeText(validSearchMovieTitle), ViewActions.pressKey(KeyEvent.KEYCODE_ENTER))
-        // The text is the same.
-        onView(withId(R.id.search_src_text)).check(matches(withText(validSearchMovieTitle)))
+        search {
+            enterText(validSearchMovieTitle)
+            matchText(validSearchMovieTitle)
+        }
         delayToGetResults()
         assertThat(invalidNumberItemsMessage, movieListCountItem(), greaterThan(minMoviesWithTitle))
     }
@@ -83,11 +84,10 @@ class MainActivityInstrumentedTest {
      */
     @Test
     fun invalidSearchTest() {
-        // Type title and then press enter the button to search.
-        onView(withId(R.id.search_src_text))
-            .perform(ViewActions.typeText(invalidSearchMovieTitle), ViewActions.pressKey(KeyEvent.KEYCODE_ENTER))
-        // The text is still present.
-        onView(withId(R.id.search_src_text)).check(matches(withText(invalidSearchMovieTitle)))
+        search {
+            enterText(invalidSearchMovieTitle)
+            matchText(invalidSearchMovieTitle)
+        }
         // Verify if there is at least the minimum title expected.
         delayToGetResults()
         assertEquals(movieListCountItem(), 0)
@@ -98,10 +98,11 @@ class MainActivityInstrumentedTest {
      */
     @Test
     fun searchRemovePopularSelectionTest() {
-        onView(withId(R.id.chip_popular)).check(matches(hasTextColor(R.color.chips_text_color_not_checked)))
-        onView(withId(R.id.chip_popular)).perform(ViewActions.click())
+        clickInPopularChip()
         validSearchTest()
-        onView(withId(R.id.chip_popular)).check(matches(hasTextColor(R.color.chips_text_color_not_checked)))
+        popular {
+            matchTextColor(R.color.chips_text_color_not_checked)
+        }
     }
 
     /**
@@ -109,10 +110,11 @@ class MainActivityInstrumentedTest {
      */
     @Test
     fun searchRemoveFavoriteSelectionTest() {
-        onView(withId(R.id.chip_favorite)).check(matches(hasTextColor(R.color.chips_text_color_not_checked)))
-        onView(withId(R.id.chip_favorite)).perform(ViewActions.click())
+        clickInFavoriteChip()
         validSearchTest()
-        onView(withId(R.id.chip_favorite)).check(matches(hasTextColor(R.color.chips_text_color_not_checked)))
+        favorite {
+            matchTextColor(R.color.chips_text_color_not_checked)
+        }
     }
 
     /**
@@ -128,7 +130,9 @@ class MainActivityInstrumentedTest {
         assertEquals(movieListCountItem(), 1)
 
         // Remove text that is in the Search.
-        onView(withId(R.id.search_src_text)).perform(ViewActions.replaceText(""))
+        search {
+            replaceText("")
+        }
         validSearchTest()
         clickInFirstFavoriteFabElement()
         clickInFavoriteChip()
@@ -180,6 +184,7 @@ class MainActivityInstrumentedTest {
      */
     @Test
     fun addAndRemoveFavoriteMovieFromPopularChipTest() {
+        clickInPopularChip()
         // Clean favorite to have a test control.
         cleanFavoriteFabTest()
         // Add the first movie to be favorite.
@@ -202,9 +207,14 @@ class MainActivityInstrumentedTest {
      */
     @Test
     fun clickInFavoriteMovieTest() {
-        onView(withId(R.id.chip_favorite)).check(matches(hasTextColor(R.color.chips_text_color_not_checked)))
-        onView(withId(R.id.chip_favorite)).perform(ViewActions.click())
-        onView(withId(R.id.chip_favorite)).check(matches(hasTextColor(R.color.chips_text_color_checked)))
+        popular {
+            performClick()
+        }
+        favorite {
+            matchTextColor(R.color.chips_text_color_not_checked)
+            performClick()
+            matchTextColor(R.color.chips_text_color_checked)
+        }
         delayToGetResults()
     }
 
@@ -247,7 +257,8 @@ class MainActivityInstrumentedTest {
 
     @Before
     fun tearDown() {
-        InstrumentedUtilsTest.delayToGetResults()
+        val baseTestRobot: BaseTestRobot = BaseTestRobot()
+        baseTestRobot.waitFor(2000)
     }
 
     //region auxiliary methods
@@ -258,13 +269,12 @@ class MainActivityInstrumentedTest {
         clickInFavoriteChip()
 
         val initialMovieListSize = movieListCountItem()
-        for (i in 1..initialMovieListSize) {
-            onView(withId(R.id.movie_list)).perform(
-                RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                    0, clickOnViewChild(R.id.favorite_fab)
-                )
-            )
-            assertEquals(initialMovieListSize - i, movieListCountItem())
+
+        movieList {
+            for (i in 1..initialMovieListSize) {
+                clickFavoriteFab()
+                assertEquals(initialMovieListSize - i, movieListCountItem())
+            }
         }
         assertEquals(movieListCountItem(), 0)
     }
@@ -273,31 +283,28 @@ class MainActivityInstrumentedTest {
      * Do a click in Favorite FAB.
      */
     private fun clickInFirstFavoriteFabElement() {
-        onView(withId(R.id.movie_list)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                0, clickOnViewChild(R.id.favorite_fab)
-            )
-        )
+        movieList {
+            clickFavoriteFab(0)
+        }
     }
 
     /**
      * Do a click in the first movie item shown in the movie list.
      */
     private fun clickInFirstItemInTheMovieList() {
-        onView(withId(R.id.movie_list)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                0, clickOnViewChild(R.id.summary_poster_image_view)
-            )
-        )
+        movieList {
+            clickSummaryPosterImage(0)
+        }
     }
 
     /**
      * Click in "Popular" chip.
      */
     private fun clickInPopularChip() {
-        onView(withId(R.id.chip_popular)).check(matches(hasTextColor(R.color.chips_text_color_not_checked)))
-        onView(withId(R.id.chip_popular)).perform(ViewActions.click())
-        onView(withId(R.id.chip_popular)).check(matches(hasTextColor(R.color.chips_text_color_checked)))
+        popular {
+            performClick()
+            matchTextColor(R.color.chips_text_color_checked)
+        }
         delayToGetResults()
     }
 
@@ -305,9 +312,10 @@ class MainActivityInstrumentedTest {
      * Click in "Favorite" chip.
      */
     private fun clickInFavoriteChip() {
-        onView(withId(R.id.chip_favorite)).check(matches(hasTextColor(R.color.chips_text_color_not_checked)))
-        onView(withId(R.id.chip_favorite)).perform(ViewActions.click())
-        onView(withId(R.id.chip_favorite)).check(matches(hasTextColor(R.color.chips_text_color_checked)))
+        favorite {
+            performClick()
+            matchTextColor(R.color.chips_text_color_checked)
+        }
         delayToGetResults()
     }
 

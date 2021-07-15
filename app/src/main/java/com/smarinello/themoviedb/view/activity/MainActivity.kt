@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity(), MovieListAdapter.MovieListAdapterListe
         super.onCreate(savedInstanceState)
         bindViewModel()
         setupViewModel()
+        viewModel.onInitialize()
     }
 
     override fun onResume() {

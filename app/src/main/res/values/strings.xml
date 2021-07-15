@@ -5,8 +5,11 @@
     <string name="search_hint">What do you want to search ?</string>
     <string name="content_description_image">An image</string>
 
-    <!--    Error messages-->
+    <!-- Error messages -->
     <string name="error_message_connectivity">Please check your internet connection and try again.</string>
     <string name="error_fetch_data">Some error happens to fetch the data. Please check your internet connection and try again.</string>
+
+    <!-- Info messages -->
+    <string name="info_message_search_only_favorite_movies">No internet. Search will be done <b>ONLY</b> in the favorite saved movies</string>
 
 </resources>

@@ -4,14 +4,13 @@ import android.content.Intent
 import androidx.core.view.isVisible
 import androidx.core.widget.ContentLoadingProgressBar
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso
 import androidx.test.espresso.IdlingPolicies
-import androidx.test.espresso.assertion.ViewAssertions
-import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.smarinello.themoviedb.model.MovieDetails
+import com.smarinello.themoviedb.robot.detailsMovie
+import com.smarinello.themoviedb.robot.toolbar
 import com.smarinello.themoviedb.utils.ConnectivityUtils
 import com.smarinello.themoviedb.view.activity.DetailActivity
 import org.junit.After
@@ -23,11 +22,13 @@ import org.junit.runner.RunWith
 import java.util.concurrent.TimeUnit
 
 /**
- * This class consist to verify the DetailActivity and demands internet connection.
+ * This class consist to verify the DetailActivity and demands internet connection and a valid API key.
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class DetailActivityInstrumentedTest {
+
+    private val invalidApiKeyValue: String = "put the key value here"
 
     /**
      * Valid movie id: John Wick
@@ -51,6 +52,9 @@ class DetailActivityInstrumentedTest {
         IdlingPolicies.setMasterPolicyTimeout(1, TimeUnit.MINUTES)
         IdlingPolicies.setIdlingResourceTimeout(1, TimeUnit.MINUTES)
 
+        // Check for a valid API key
+        Assert.assertNotEquals(BuildConfig.API_KEY_VALUE, invalidApiKeyValue)
+
         // Check internet connection
         activityRule.scenario.onActivity { activity ->
             Assert.assertEquals(ConnectivityUtils(activity).isInternetAccessAvailable(), true)
@@ -60,19 +64,17 @@ class DetailActivityInstrumentedTest {
     @Test
     fun checkMovieTitle() {
         delayToGetResults()
-        Espresso.onView(ViewMatchers.withId(R.id.detail_toolbar)).check(
-            ViewAssertions.matches(
-                ViewMatchers.hasDescendant(ViewMatchers.withText(validMovieTitle))
-            )
-        )
+        toolbar {
+            hasDescendantWithText(validMovieTitle)
+        }
     }
 
     @Test
     fun checkMovieOverview() {
         delayToGetResults()
-        Espresso.onView(ViewMatchers.withId(R.id.detail_overview)).check(
-            ViewAssertions.matches(ViewMatchers.withText(validMovieOverview))
-        )
+        detailsMovie {
+            checkOverviewText(validMovieOverview)
+        }
     }
 
     @After

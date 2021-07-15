@@ -21,7 +21,6 @@
     <dimen name="details_constraint_guide_dimension">8dp</dimen>
     <dimen name="details_text_size_release">14sp</dimen>
     <dimen name="details_margin_top_dimension">16dp</dimen>
-    <dimen name="detail_text_size_title">40sp</dimen>
     <dimen name="details_text_size_overview">16sp</dimen>
     <dimen name="detail_image_height">450dp</dimen>
 
